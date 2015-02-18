@@ -18,11 +18,13 @@
  */
 package org.kuali.kra.award.contacts;
 
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.framework.contact.Contactable;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
 import org.kuali.coeus.common.framework.person.PropAwardPersonRoleService;
 import org.kuali.coeus.common.framework.rolodex.NonOrganizationalRolodex;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.AwardAssociate;
 import org.kuali.kra.award.AwardTemplateSyncScope;
@@ -52,10 +54,12 @@ public abstract class AwardContact extends AwardAssociate {
      * we need to provide real fields to be persisted
      */
     @AwardSyncableProperty(key = true)
+    @JsonView(JsonViews.Summary.class)
     protected String personId;
 
     @AwardSyncableProperty(key = true)
     @AwardSyncable(scopes = { AwardTemplateSyncScope.CONTAINING_CLASS_INHERIT })
+    @JsonView(JsonViews.Summary.class)
     protected Integer rolodexId;
 
     @AwardSyncableProperty(key = true)
@@ -64,13 +68,16 @@ public abstract class AwardContact extends AwardAssociate {
 
     private Long awardContactId;
 
+    @JsonView(JsonViews.Summary.class)
     protected ContactRole contactRole;
 
     @AwardSyncableProperty
     private String fullName;
 
+    @JsonView(JsonViews.Summary.class)
     private KcPerson person;
 
+    @JsonView(JsonViews.Summary.class)
     private NonOrganizationalRolodex rolodex;
 
     private transient KcPersonService kcPersonService;

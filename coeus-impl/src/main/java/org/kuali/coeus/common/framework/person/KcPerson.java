@@ -23,10 +23,12 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.api.person.KcPersonContract;
 import org.kuali.coeus.common.framework.contact.Contactable;
 import org.kuali.coeus.common.framework.person.attr.KcPersonExtendedAttributes;
 import org.kuali.coeus.common.framework.unit.Unit;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.rice.kim.api.identity.IdentityService;
 import org.kuali.rice.kim.api.identity.address.EntityAddress;
@@ -275,6 +277,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
      * @return the value of lastName
      */
     @Override
+    @JsonView(JsonViews.Summary.class)
     public String getLastName() {
         final EntityNameContract name = this.entity.getDefaultName();
         if (name == null) {
@@ -289,6 +292,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
      * @return the value of firstName
      */
     @Override
+    @JsonView(JsonViews.Summary.class)
     public String getFirstName() {
         final EntityNameContract name = this.entity.getDefaultName();
         if (name == null) {
@@ -304,6 +308,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
      * @return the value of middleName
      */
     @Override
+    @JsonView(JsonViews.Summary.class)
     public String getMiddleName() {
         final EntityNameContract name = this.entity.getDefaultName();
         if (name == null) {
@@ -345,6 +350,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
      * @return the value of userName
      */
     @Override
+    @JsonView(JsonViews.Summary.class)
     public String getUserName() {
         final String userName = this.getPrincipal() != null? this.getPrincipal().getPrincipalName() : null;
         
@@ -357,6 +363,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
      * @return the value of emailAddress
      */
     @Override
+    @JsonView(JsonViews.Summary.class)
     public String getEmailAddress() {
         return selectSingleValue(this.getEntityType().getEmailAddresses(), new Selector<EntityEmailContract, String>() {
             public String notFoundValue() { return ""; }

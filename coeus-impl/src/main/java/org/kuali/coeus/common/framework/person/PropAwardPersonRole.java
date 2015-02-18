@@ -18,6 +18,7 @@
  */
 package org.kuali.coeus.common.framework.person;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.kuali.coeus.sys.api.model.Coded;
 import org.kuali.coeus.sys.api.model.IdentifiableNumeric;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
@@ -53,12 +54,14 @@ public class PropAwardPersonRole extends KcPersistableBusinessObjectBase impleme
     @GeneratedValue(generator = "SEQ_EPS_PROP_PERSON_ROLE")
     @Id
     @Column(name = "PROP_PERSON_ROLE_ID")
+    @JsonIgnore
     private Long id;
     
     @Column(name = "PROP_PERSON_ROLE_CODE")
     private String code;
     
     @Column(name = "SPONSOR_HIERARCHY_NAME")
+    @JsonIgnore
     private String sponsorHierarchyName;
 
     @Column(name = "DESCRIPTION")
@@ -66,13 +69,16 @@ public class PropAwardPersonRole extends KcPersistableBusinessObjectBase impleme
 
     @Column(name = "CERTIFICATION_REQUIRED")
     @Convert(converter = BooleanYNConverter.class)
+    @JsonIgnore
     private Boolean certificationRequired = Boolean.TRUE;
     
     @Column(name="READ_ONLY_ROLE")
+    @JsonIgnore
     private Boolean readOnly;
 
     @Column(name = "UNIT_DETAILS_REQUIRED")
     @Convert(converter = BooleanYNConverter.class)
+    @JsonIgnore
     private Boolean unitDetailsRequired = Boolean.TRUE;
 
     public final String getCode() {

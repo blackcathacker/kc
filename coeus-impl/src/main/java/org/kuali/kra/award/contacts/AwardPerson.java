@@ -20,6 +20,7 @@ package org.kuali.kra.award.contacts;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.rolodex.NonOrganizationalRolodex;
 import org.kuali.coeus.common.framework.person.PropAwardPersonRole;
@@ -30,6 +31,7 @@ import org.kuali.kra.award.home.ContactRole;
 import org.kuali.kra.bo.AbstractProjectPerson;
 import org.kuali.coeus.common.framework.rolodex.PersonRolodex;
 import org.kuali.coeus.sys.api.model.ScaleTwoDecimal;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 
 import java.util.ArrayList;
@@ -60,12 +62,14 @@ public class AwardPerson extends AwardContact implements PersonRolodex, Comparab
     private ScaleTwoDecimal totalEffort;
 
     @AwardSyncableProperty
+    @JsonView(JsonViews.Summary.class)
     private String keyPersonRole;
     
     @AwardSyncableProperty
     private boolean optInUnitStatus;
 
     @AwardSyncableProperty
+    @JsonView(JsonViews.Summary.class)
     private List<AwardPersonUnit> units;
 
     private List<AwardPersonCreditSplit> creditSplits;

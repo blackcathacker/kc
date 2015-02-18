@@ -35,6 +35,7 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class KcConfigurer extends ModuleConfigurer {
     
     private String bootstrapSpringFile;
     private String dispatchServletName;
-    private List<String> filtersToMap;
+    private List<String> filtersToMap = new ArrayList<String>();
     private String moduleTitle;
     
     private ResourceLoader rootResourceLoader;

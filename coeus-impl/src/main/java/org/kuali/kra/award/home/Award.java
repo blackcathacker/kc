@@ -19,6 +19,7 @@
 package org.kuali.kra.award.home;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.framework.keyword.KeywordsManager;
 import org.kuali.coeus.common.framework.keyword.ScienceKeyword;
 import org.kuali.coeus.common.framework.person.KcPerson;
@@ -37,6 +38,7 @@ import org.kuali.coeus.common.permissions.impl.PermissionableKeys;
 import org.kuali.coeus.common.framework.auth.SystemAuthorizationService;
 import org.kuali.coeus.common.framework.auth.perm.Permissionable;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.award.AwardAmountInfoService;
 import org.kuali.kra.award.AwardTemplateSyncScope;
@@ -126,13 +128,18 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(Award.class);
     private Long awardId;
     private AwardDocument awardDocument;
+    @JsonView(JsonViews.Summary.class)
     private String awardNumber;
+    @JsonView(JsonViews.Summary.class)
     private Integer sequenceNumber;
     @AwardSyncableProperty
+    @JsonView(JsonViews.Summary.class)
     private String sponsorCode;
     @AwardSyncableProperty
     private Integer statusCode;
+    @JsonView(JsonViews.Summary.class)
     private AwardStatus awardStatus;
+    @JsonView(JsonViews.Summary.class)
     private String accountNumber;
     private String approvedEquipmentIndicator;
     private String approvedForeignTripIndicator;
@@ -142,17 +149,21 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     private Date beginDate;
     private String costSharingIndicator;
     private String indirectCostIndicator;
+    @JsonView(JsonViews.Summary.class)
     private String modificationNumber;
     private String nsfCode;
     private String paymentScheduleIndicator;
     private String scienceCodeIndicator;
     private String specialReviewIndicator;
+    @JsonView(JsonViews.Summary.class)
     private String sponsorAwardNumber;
     private String transferSponsorIndicator;
     private Integer accountTypeCode;
     private String activityTypeCode;
     private Integer awardTypeCode;
+    @JsonView(JsonViews.Summary.class)
     private AwardType awardType;
+    @JsonView(JsonViews.Summary.class)
     private String cfdaNumber;
     private String documentFundingId;
     private ScaleTwoDecimal preAwardAuthorizedAmount;
@@ -160,10 +171,12 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     private ScaleTwoDecimal preAwardInstitutionalAuthorizedAmount;
     private Date preAwardInstitutionalEffectiveDate;
     private String procurementPriorityCode;
+    @JsonView(JsonViews.Summary.class)
     private String proposalNumber;
     private ScaleTwoDecimal specialEbRateOffCampus;
     private ScaleTwoDecimal specialEbRateOnCampus;
     private String subPlanFlag;
+    @JsonView(JsonViews.Summary.class)
     private String title;
     private String archiveLocation;
     private Date closeoutDate;
@@ -2431,6 +2444,7 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
      * Find principle investigator, if any
      * @return Principle investigator. May return null
      */
+    @JsonView(JsonViews.Summary.class)
     public AwardPerson getPrincipalInvestigator() {
         AwardPerson principleInvestigator = null;
         for (AwardPerson person : projectPersons) {
