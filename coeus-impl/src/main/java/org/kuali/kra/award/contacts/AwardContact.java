@@ -22,6 +22,7 @@ import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.framework.contact.Contactable;
 import org.kuali.coeus.common.framework.person.KcPerson;
 import org.kuali.coeus.common.framework.person.KcPersonService;
+import org.kuali.coeus.common.framework.person.PropAwardPersonRole;
 import org.kuali.coeus.common.framework.person.PropAwardPersonRoleService;
 import org.kuali.coeus.common.framework.rolodex.NonOrganizationalRolodex;
 import org.kuali.coeus.sys.framework.rest.JsonViews;
@@ -81,6 +82,15 @@ public abstract class AwardContact extends AwardAssociate {
     private NonOrganizationalRolodex rolodex;
 
     private transient KcPersonService kcPersonService;
+    
+    public Map<String, Object> toSummaryMap() {
+    	Map<String, Object> result = new HashMap<String, Object>();
+    	result.put("personId", personId);
+    	result.put("rolodexId", rolodexId);
+    	result.put("contactRole", contactRole != null && contactRole instanceof PropAwardPersonRole ? ((PropAwardPersonRole) contactRole).toMap() : contactRole);
+    	result.put("person", getPerson() != null ? getPerson().toSummaryMap() : null);
+    	return result;
+    }
 
     @Transient
     private transient PropAwardPersonRoleService propAwardPersonRoleService;

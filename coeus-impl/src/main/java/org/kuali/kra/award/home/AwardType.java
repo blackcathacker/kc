@@ -18,8 +18,13 @@
  */
 package org.kuali.kra.award.home;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.award.api.core.AwardTypeContract;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,9 +44,11 @@ public class AwardType extends KcPersistableBusinessObjectBase implements AwardT
 
     @Id
     @Column(name = "AWARD_TYPE_CODE")
+    @JsonView(JsonViews.Summary.class)
     private Integer code;
 
     @Column(name = "DESCRIPTION")
+    @JsonView(JsonViews.Summary.class)
     private String description;
 
     @Override
@@ -91,5 +98,12 @@ public class AwardType extends KcPersistableBusinessObjectBase implements AwardT
         } else if (!description.equals(other.description))
             return false;
         return true;
+    }
+    
+    public Map<String, Object> toMap() {
+    	Map<String, Object> result = new HashMap<String, Object>();
+    	result.put("code", code);
+    	result.put("description", description);
+    	return result;
     }
 }

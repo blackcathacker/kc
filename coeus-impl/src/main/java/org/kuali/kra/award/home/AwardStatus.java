@@ -18,7 +18,12 @@
  */
 package org.kuali.kra.award.home;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 
 /**
  * 
@@ -29,8 +34,10 @@ public class AwardStatus extends KcPersistableBusinessObjectBase {
 
     private static final long serialVersionUID = 7554440681643595144L;
 
+    @JsonView(JsonViews.Summary.class)
     private String statusCode;
 
+    @JsonView(JsonViews.Summary.class)
     private String description;
 
     public AwardStatus() {
@@ -86,5 +93,12 @@ public class AwardStatus extends KcPersistableBusinessObjectBase {
             return false;
         }
         return true;
+    }
+    
+    public Map<String, Object> toMap() {
+    	Map<String, Object> result = new HashMap<>();
+    	result.put("statusCode", statusCode);
+    	result.put("description", description);
+    	return result;
     }
 }

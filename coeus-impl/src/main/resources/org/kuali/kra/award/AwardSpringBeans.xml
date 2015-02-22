@@ -36,7 +36,7 @@
     <tx:annotation-driven transaction-manager="transactionManager" />
     <context:annotation-config />
     <context:component-scan base-package="org.kuali.kra.award" />
-    <context:component-scan base-package="org.kuali.coues.award"/>
+    <context:component-scan base-package="org.kuali.coeus.award"/>
     
     <import resource="classpath:org/kuali/coeus/sys/framework/ImportRiceKradSpringBeans.xml"/>
 

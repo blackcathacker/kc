@@ -133,7 +133,6 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     @JsonView(JsonViews.Summary.class)
     private Integer sequenceNumber;
     @AwardSyncableProperty
-    @JsonView(JsonViews.Summary.class)
     private String sponsorCode;
     @AwardSyncableProperty
     private Integer statusCode;
@@ -171,7 +170,6 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     private ScaleTwoDecimal preAwardInstitutionalAuthorizedAmount;
     private Date preAwardInstitutionalEffectiveDate;
     private String procurementPriorityCode;
-    @JsonView(JsonViews.Summary.class)
     private String proposalNumber;
     private ScaleTwoDecimal specialEbRateOffCampus;
     private ScaleTwoDecimal specialEbRateOnCampus;
@@ -3509,5 +3507,19 @@ public class Award extends KcPersistableBusinessObjectBase implements KeywordsMa
     public void setAwardCgbList(List<AwardCgb> awardCgbList) {
         this.awardCgbList = awardCgbList;
     }
-
+    
+    public Map<String, Object> toSummaryMap() {
+    	Map<String, Object> result = new HashMap<String, Object>();
+    	result.put("awardNumber", awardNumber);
+    	result.put("sequenceNumber", sequenceNumber);
+    	result.put("awardStatus", awardStatus != null ? awardStatus.toMap() : null);
+    	result.put("accountNumber", accountNumber);
+    	result.put("modificationNumber", modificationNumber);
+    	result.put("sponsorAwardNumber", sponsorAwardNumber);
+    	result.put("awardType", awardType != null ? awardType.toMap() : null);
+    	result.put("cfdaNumber", cfdaNumber);
+    	result.put("title", title);
+    	result.put("principalInvestigator", getPrincipalInvestigator() != null ? getPrincipalInvestigator().toSummaryMap() : null);
+    	return result;
+    }
 }

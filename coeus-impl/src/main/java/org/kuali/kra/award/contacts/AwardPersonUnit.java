@@ -19,10 +19,12 @@
 package org.kuali.kra.award.contacts;
 
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.framework.version.sequence.associate.SequenceAssociate;
 import org.kuali.coeus.common.framework.unit.Unit;
 import org.kuali.coeus.common.framework.unit.admin.UnitAdministrator;
 import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
+import org.kuali.coeus.sys.framework.rest.JsonViews;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
 import org.kuali.kra.SkipVersioning;
 import org.kuali.kra.award.awardhierarchy.sync.AwardSyncableProperty;
@@ -46,6 +48,7 @@ public class AwardPersonUnit extends KcPersistableBusinessObjectBase implements 
     private AwardPerson awardPerson;
 
     @AwardSyncableProperty
+    @JsonView(JsonViews.Summary.class)
     private boolean leadUnit;
 
     private Unit unit;
@@ -54,9 +57,18 @@ public class AwardPersonUnit extends KcPersistableBusinessObjectBase implements 
 
     // OJB Hack  
     @AwardSyncableProperty(key = true)
+    @JsonView(JsonViews.Summary.class)
     private String unitNumber;
 
     private Long awardContactId;
+    
+    public Map<String, Object> toMap() {
+    	Map<String, Object> result = new HashMap<>();
+    	result.put("unitNumber", unitNumber);
+    	result.put("leadUnit", leadUnit);
+    	result.put("unitName", unit.getUnitName());
+    	return result;
+    }
 
 
     public AwardPersonUnit() {

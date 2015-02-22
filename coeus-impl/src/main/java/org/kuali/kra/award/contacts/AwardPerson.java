@@ -62,7 +62,6 @@ public class AwardPerson extends AwardContact implements PersonRolodex, Comparab
     private ScaleTwoDecimal totalEffort;
 
     @AwardSyncableProperty
-    @JsonView(JsonViews.Summary.class)
     private String keyPersonRole;
     
     @AwardSyncableProperty
@@ -77,6 +76,17 @@ public class AwardPerson extends AwardContact implements PersonRolodex, Comparab
     private transient boolean roleChanged;
     
     private transient PropAwardPersonRoleService propAwardPersonRoleService;
+    
+    public Map<String, Object> toSummaryMap() {
+    	Map<String, Object> result = new HashMap<>();
+    	List<Map> unitList = new ArrayList<>();
+    	for (AwardPersonUnit unit : units) {
+    		unitList.add(unit.toMap());
+    	}
+    	result.put("units", unitList);
+    	result.putAll(super.toSummaryMap());
+    	return result;
+    }
 
     public AwardPerson() {
         super();

@@ -18,6 +18,9 @@
  */
 package org.kuali.coeus.common.framework.person;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.kuali.coeus.sys.api.model.Coded;
 import org.kuali.coeus.sys.api.model.IdentifiableNumeric;
@@ -66,6 +69,13 @@ public class PropAwardPersonRole extends KcPersistableBusinessObjectBase impleme
 
     @Column(name = "DESCRIPTION")
     private String description;
+    
+    public Map<String, Object> toMap() {
+    	Map<String, Object> result = new HashMap<>();
+    	result.put("code", code);
+    	result.put("description", description);
+    	return result;
+    }
 
     @Column(name = "CERTIFICATION_REQUIRED")
     @Convert(converter = BooleanYNConverter.class)

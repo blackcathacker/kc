@@ -23,6 +23,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonView;
 import org.kuali.coeus.common.api.person.KcPersonContract;
 import org.kuali.coeus.common.framework.contact.Contactable;
@@ -57,6 +58,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a person in KC.
@@ -928,6 +931,7 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
     }
 
     @Override
+    @JsonIgnore
     public boolean isActive() {
         return getActive();
     }
@@ -1222,5 +1226,16 @@ public class KcPerson extends TransientBusinessObjectBase implements Contactable
         B select(A a);
         /** value to use when no values are selected. */
         B notFoundValue();
+    }
+    
+    public Map<String, Object> toSummaryMap() {
+    	Map<String, Object> result = new HashMap<>();
+    	result.put("personId", personId);
+    	result.put("lastName", getLastName());
+    	result.put("firstName", getFirstName());
+    	result.put("middleName", getMiddleName());
+    	result.put("userName", getUserName());
+    	result.put("emailAddress", getEmailAddress());
+    	return result;
     }
 }
