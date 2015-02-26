@@ -81,10 +81,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public abstract class ProposalDevelopmentControllerBase {
 
@@ -263,7 +260,7 @@ public abstract class ProposalDevelopmentControllerBase {
              getAuditHelper().auditConditionally(form);
          }
 
-         
+
          populateAdHocRecipients(form.getProposalDevelopmentDocument());
 
          if (StringUtils.equalsIgnoreCase(form.getPageId(), Constants.CREDIT_ALLOCATION_PAGE)) {
@@ -409,8 +406,9 @@ public abstract class ProposalDevelopmentControllerBase {
             if ((new ProposalDevelopmentDocumentRule().processAttachmentRules(form.getProposalDevelopmentDocument()))
                     && (new ProposalDevelopmentDocumentRule().processPersonnelAttachmentDuplicates(form.getProposalDevelopmentDocument()))) {
             	form.getProposalDevelopmentAttachmentHelper().handleNarrativeUpdates(form, document);
-            	form.getProposalDevelopmentAttachmentHelper().handleInstAttachmentUpdates(form, document);
-            	form.getProposalDevelopmentAttachmentHelper().handlePersonBioUpdates(form, document);
+                document.getDevelopmentProposal().setNarratives(form.getDevelopmentProposal().getNarratives());
+                document.getDevelopmentProposal().setInstituteAttachments(form.getDevelopmentProposal().getInstituteAttachments());
+                document.getDevelopmentProposal().setPropPersonBios(form.getDevelopmentProposal().getPropPersonBios());
                 document.getDevelopmentProposal().setProposalAbstracts(form.getDevelopmentProposal().getProposalAbstracts());
                 document.setNotes(form.getDocument().getNotes());
                 form.setDocument(document);

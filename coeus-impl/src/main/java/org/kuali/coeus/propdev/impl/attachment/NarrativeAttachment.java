@@ -19,9 +19,20 @@
 package org.kuali.coeus.propdev.impl.attachment;
 
 import javax.persistence.*;
+import javax.sql.rowset.serial.SerialBlob;
 
+import org.kuali.coeus.common.framework.attachment.KcAttachmentDataDao;
 import org.kuali.coeus.common.framework.print.AttachmentDataSource;
 import org.kuali.coeus.propdev.api.attachment.NarrativeAttachmentContract;
+import org.kuali.coeus.sys.framework.service.KcServiceLocator;
+import org.kuali.rice.krad.data.DataObjectService;
+import org.kuali.rice.krad.service.KRADServiceLocator;
+
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.kuali.coeus.dc.common.db.PreparedStatementUtils.setString;
 
 @Entity
 @Table(name = "NARRATIVE_ATTACHMENT")
@@ -55,4 +66,30 @@ public class NarrativeAttachment extends AttachmentDataSource implements Narrati
     public void setNarrative(Narrative narrative) {
         this.narrative = narrative;
     }
+
+    @Override
+    public byte[] getData() {
+        if (super.getData() == null) {
+            Map<String,String> parameters = new HashMap<String,String>();
+            parameters.put("PROPOSAL_NUMBER",this.getProposalNumber());
+            parameters.put("MODULE_NUMBER",this.getModuleNumber().toString());
+            return getKcAttachmentDao().getData("NARRATIVE_ATTACHMENT", "NARRATIVE_DATA", parameters);
+
+        }
+        return super.getData();
+    }
+
+    @Override
+    protected void postPersist() {
+            Map<String,String> parameters = new HashMap<String,String>();
+            parameters.put("PROPOSAL_NUMBER",this.getProposalNumber());
+            parameters.put("MODULE_NUMBER",this.getModuleNumber().toString());
+            getKcAttachmentDao().setData("NARRATIVE_ATTACHMENT", "NARRATIVE_DATA", parameters, this.getData());
+            this.setData(null);
+    }
+
+    private KcAttachmentDataDao getKcAttachmentDao() {
+        return KcServiceLocator.getService(KcAttachmentDataDao.class);
+    }
+
 }
