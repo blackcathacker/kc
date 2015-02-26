@@ -1,10 +1,14 @@
 package org.kuali.coeus.award.summary;
 
+import com.codiform.moo.annotation.Optionality;
+import com.codiform.moo.annotation.Property;
+
 public class InvestigatorDto {
 
 	private String personId;
 	private String fullName;
 	private String emailAddress;
+	@Property(source = "mvel:person.?userName", optionality=Optionality.OPTIONAL)
 	private String userName;
 	private String roleCode;
 	private String projectRole;
