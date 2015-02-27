@@ -18,27 +18,33 @@
  */
 package org.kuali.coeus.propdev.impl.attachment;
 
+import java.lang.ref.SoftReference;
+
 import javax.persistence.*;
-import javax.sql.rowset.serial.SerialBlob;
 
 import org.kuali.coeus.common.framework.attachment.KcAttachmentDataDao;
 import org.kuali.coeus.common.framework.print.AttachmentDataSource;
 import org.kuali.coeus.propdev.api.attachment.NarrativeAttachmentContract;
+import org.kuali.coeus.sys.api.model.KcFile;
+import org.kuali.coeus.sys.framework.model.KcPersistableBusinessObjectBase;
 import org.kuali.coeus.sys.framework.service.KcServiceLocator;
-import org.kuali.rice.krad.data.DataObjectService;
-import org.kuali.rice.krad.service.KRADServiceLocator;
-
-import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.kuali.coeus.dc.common.db.PreparedStatementUtils.setString;
 
 @Entity
 @Table(name = "NARRATIVE_ATTACHMENT")
-@AttributeOverride(name = "data",  column = @Column(name = "NARRATIVE_DATA"))
 @IdClass(Narrative.NarrativeId.class)
-public class NarrativeAttachment extends AttachmentDataSource implements NarrativeAttachmentContract {
+public class NarrativeAttachment extends KcPersistableBusinessObjectBase implements NarrativeAttachmentContract, KcFile {
+
+    @Column(name = "FILE_NAME")
+    private String name;
+
+    @Column(name = "CONTENT_TYPE")
+    private String type;
+    
+    @Column(name = "FILE_DATA_ID")
+    private String fileDataId;
+
+    @Transient
+    private SoftReference<byte[]> data;
 
     @Id
     @OneToOne(cascade = { CascadeType.REFRESH })
@@ -69,27 +75,57 @@ public class NarrativeAttachment extends AttachmentDataSource implements Narrati
 
     @Override
     public byte[] getData() {
-        if (super.getData() == null) {
-            Map<String,String> parameters = new HashMap<String,String>();
-            parameters.put("PROPOSAL_NUMBER",this.getProposalNumber());
-            parameters.put("MODULE_NUMBER",this.getModuleNumber().toString());
-            return getKcAttachmentDao().getData("NARRATIVE_ATTACHMENT", "NARRATIVE_DATA", parameters);
-
+        if (data == null || data.get() == null) {
+        	byte[] newData = getKcAttachmentDao().getData(fileDataId); 
+        	data = new SoftReference<byte[]>(newData);
+            return newData;
+        } else {
+        	return data.get();
         }
-        return super.getData();
-    }
-
-    @Override
-    protected void postPersist() {
-            Map<String,String> parameters = new HashMap<String,String>();
-            parameters.put("PROPOSAL_NUMBER",this.getProposalNumber());
-            parameters.put("MODULE_NUMBER",this.getModuleNumber().toString());
-            getKcAttachmentDao().setData("NARRATIVE_ATTACHMENT", "NARRATIVE_DATA", parameters, this.getData());
-            this.setData(null);
     }
 
     private KcAttachmentDataDao getKcAttachmentDao() {
         return KcServiceLocator.getService(KcAttachmentDataDao.class);
     }
 
+	public String getFileDataId() {
+		return fileDataId;
+	}
+
+	public void setFileDataId(String fileDataId) {
+		this.fileDataId = fileDataId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setData(byte[] data) {
+		if (data == null) {
+			getKcAttachmentDao().removeData(fileDataId);
+		} else {
+			fileDataId = getKcAttachmentDao().saveData(data, fileDataId);
+		}
+		this.data = new SoftReference<byte[]>(data);
+	}
+	
+	@PreRemove
+	public void removeData() {
+		if (fileDataId != null) {
+			getKcAttachmentDao().removeData(fileDataId);
+		}
+	}
+	
 }

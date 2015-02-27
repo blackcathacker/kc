@@ -36,8 +36,10 @@ public abstract class AttachmentDataSource extends KcPersistableBusinessObjectBa
     @Column(name = "CONTENT_TYPE")
     private String type;
 
-    @Transient
-    private byte[] data;
+    @Column(name="DATA", updatable = false)
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    protected byte[] data;
 
     @Override
     public String getName() {
