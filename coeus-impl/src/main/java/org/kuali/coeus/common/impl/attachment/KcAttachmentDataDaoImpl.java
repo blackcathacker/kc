@@ -2,6 +2,8 @@ package org.kuali.coeus.common.impl.attachment;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kuali.coeus.common.framework.attachment.KcAttachmentDataDao;
@@ -16,6 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component("kcAttachmentDataDao")
@@ -26,6 +30,8 @@ public class KcAttachmentDataDaoImpl implements KcAttachmentDataDao {
     @Autowired
     @Qualifier("dataSource")
     private DataSource dataSource;
+    
+    private Set<TableReference> tableReferences;
 
     @Override
     public byte[] getData(String id) {
@@ -63,9 +69,6 @@ public class KcAttachmentDataDaoImpl implements KcAttachmentDataDao {
         }
 
         try (Connection connection = getDataSource().getConnection()) {
-        	if (StringUtils.isNotBlank(id)) {
-        		deleteAttachment(connection, id);
-        	}
         	try (PreparedStatement stmt = connection.prepareStatement("insert into file_data (id, data) values (?, ?)")) {
 	        	String newId = UUID.randomUUID().toString();
 	        	stmt.setString(1, newId);
@@ -75,6 +78,10 @@ public class KcAttachmentDataDaoImpl implements KcAttachmentDataDao {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Created attachment data, new id: " + newId);
                 }
+                
+            	if (StringUtils.isNotBlank(id)) {
+            		deleteAttachment(connection, id);
+            	}
 
                 return newId;
         	}
@@ -99,9 +106,48 @@ public class KcAttachmentDataDaoImpl implements KcAttachmentDataDao {
     }
         
     protected void deleteAttachment(Connection conn, String id) throws SQLException {
-    	try (PreparedStatement stmt = conn.prepareStatement("delete from file_data where id = ?")) {
-    		stmt.setString(1, id);
-    		stmt.executeUpdate();
+    	if (countReferences(conn, id) == 0) {
+	    	try (PreparedStatement stmt = conn.prepareStatement("delete from file_data where id = ?")) {
+	    		stmt.setString(1, id);
+	    		stmt.executeUpdate();
+	    	}
+    	}
+    }
+    
+    protected int countReferences(Connection conn, String id) throws SQLException {
+    	if (tableReferences == null) {
+    		populateReferences(conn);
+    	}
+    	int count = 0;
+    	for (TableReference ref : tableReferences) {
+        	try (PreparedStatement stmt = conn.prepareStatement("select count(*) from "
+        			+ ref.tableName + " where " + ref.columnName + " = ?")) {
+        		stmt.setString(1, id);
+        		try (ResultSet rs = stmt.executeQuery()) {
+        			if (rs.next()) {
+        				count += rs.getInt(1);
+        			}
+        		}
+        	}
+    	}
+    	return count;
+    }
+    
+    protected void populateReferences(Connection conn) throws SQLException {
+    	tableReferences = new HashSet<>();
+    	try (PreparedStatement stmt = conn.prepareStatement(
+    			"select table_name, column_name from information_schema.key_column_usage " 
+    					+ " where lower(referenced_table_name) = 'file_data' and lower(referenced_column_name) = 'id' " 
+    					+ " and table_schema = ?"
+    			)) {
+    		stmt.setString(1, "kcdev");
+    		try (ResultSet rs = stmt.executeQuery()) {
+    			while (rs.next()) {
+    				tableReferences.add(new TableReference(rs.getString(1), rs.getString(2)));
+    			}
+    		}
+    	} catch (Exception e) {
+    		tableReferences = null;
     	}
     }
 
@@ -112,4 +158,36 @@ public class KcAttachmentDataDaoImpl implements KcAttachmentDataDao {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+    
+    class TableReference {
+    	public String tableName;
+		public String columnName;
+    	public TableReference(String tableName, String columnName) {
+			this.tableName = tableName;
+			this.columnName = columnName;
+		}
+    	@Override
+		public int hashCode() {
+    		return new HashCodeBuilder(17, 37).append(tableName).append(columnName).toHashCode();
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			final TableReference other = (TableReference) obj;
+			return new EqualsBuilder().append(tableName, other.tableName).append(columnName, other.columnName).isEquals();
+		}
+    }
+
+	public Set<TableReference> getTableReferences() {
+		return tableReferences;
+	}
+
+	public void setTableReferences(Set<TableReference> tableReferences) {
+		this.tableReferences = tableReferences;
+	}
 }

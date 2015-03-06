@@ -747,7 +747,7 @@ public class Narrative extends KcPersistableBusinessObjectBase implements Hierar
         this.kcAttachmentService = kcAttachmentService;
     }
 
-    @PreRemove
+    @PostRemove
     public void removeData() {
         if (getNarrativeAttachment().getFileDataId() != null) {
             getKcAttachmentDao().removeData(getNarrativeAttachment().getFileDataId());
