@@ -36,12 +36,6 @@
         <param-value>classpath:KcBootstrapSpringBeans.xml</param-value>
     </context-param>
 
-    <!-- this is resource filtered by the maven build to enable spring profiles -->
-    <context-param>
-        <param-name>spring.profiles.active</param-name>
-        <param-value>${build.spring.profiles.active}</param-value>
-    </context-param>
-
     <filter>
         <filter-name>HttpRequestLogger</filter-name>
         <filter-class>org.kuali.rice.core.RequestLoggingFilter</filter-class>

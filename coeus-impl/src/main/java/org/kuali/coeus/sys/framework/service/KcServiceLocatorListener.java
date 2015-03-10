@@ -18,8 +18,14 @@
  */
 package org.kuali.coeus.sys.framework.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Properties;
+
 import org.kuali.rice.core.web.listener.KualiInitializeListener;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 public class KcServiceLocatorListener extends KualiInitializeListener {
@@ -31,6 +37,27 @@ public class KcServiceLocatorListener extends KualiInitializeListener {
         LOG.debug("Starting KcServiceLocatorListener");
         super.contextInitialized(sce);
         KcServiceLocator.setAppContext(getContext());
+    }
+    
+    /**
+     * Translates context parameters from the web.xml into entries in a Properties file.
+     */
+    protected Properties getContextParameters(ServletContext context) {
+        Properties properties = super.getContextParameters(context);
+        Properties buildProps = new Properties();
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("META-INF/coeus-impl-build.properties")) {
+        	buildProps.load(is);
+        	for (Map.Entry<Object, Object> prop : buildProps.entrySet()) {
+        		context.setInitParameter(prop.getKey().toString(), prop.getValue().toString());
+        	}
+        	properties.putAll(buildProps);
+        } catch (IOException e) {
+        	throw new RuntimeException("Unable to read build properties", e);
+        }
+        
+
+        
+        return properties;
     }
 
 }

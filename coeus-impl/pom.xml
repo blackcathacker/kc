@@ -59,6 +59,20 @@
     </properties>
 
     <build>
+		<resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>META-INF/coeus-impl-build.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    	
         <plugins>
             <plugin>
                 <groupId>org.apache.cxf</groupId>
