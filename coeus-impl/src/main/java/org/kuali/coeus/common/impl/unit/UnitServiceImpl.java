@@ -66,10 +66,10 @@ public class UnitServiceImpl implements UnitService {
     @Override
     public String getUnitName(String unitNumber) {
         String unitName = null;
-        Map<String, String> primaryKeys = new HashMap<String, String>();
+        Map<String, String> primaryKeys = new HashMap<>();
         if (StringUtils.isNotEmpty(unitNumber)) {
             primaryKeys.put("unitNumber", unitNumber);
-            Unit unit = (Unit) getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
+            Unit unit = getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
             if (unit != null) {
                 unitName = unit.getUnitName();
             }
@@ -87,10 +87,10 @@ public class UnitServiceImpl implements UnitService {
     public Unit getUnit(String unitNumber) {
         Unit unit = null;
 
-        Map<String, String> primaryKeys = new HashMap<String, String>();
+        Map<String, String> primaryKeys = new HashMap<>();
         if (StringUtils.isNotEmpty(unitNumber)) {
             primaryKeys.put("unitNumber", unitNumber);
-            unit = (Unit) getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
+            unit = getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
         }
 
         return unit;
@@ -98,8 +98,8 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<Unit> getSubUnits(String unitNumber) {
-        List<Unit> units = new ArrayList<Unit>();
-        Map<String, Object> fieldValues = new HashMap<String, Object>();
+        List<Unit> units = new ArrayList<>();
+        Map<String, Object> fieldValues = new HashMap<>();
         fieldValues.put("parentUnitNumber", unitNumber);
         units.addAll(getBusinessObjectService().findMatching(Unit.class, fieldValues));
         return units;
@@ -107,7 +107,7 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<Unit> getAllSubUnits(String unitNumber) {
-        List<Unit> units = new ArrayList<Unit>();
+        List<Unit> units = new ArrayList<>();
         List<Unit> subUnits = getSubUnits(unitNumber);
         units.addAll(subUnits);
         for (Unit subUnit : subUnits) {
@@ -119,23 +119,19 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<Unit> getUnitHierarchyForUnit(String unitNumber) {
-        List<Unit> units = new ArrayList<Unit>();
+        List<Unit> units = new ArrayList<>();
         Unit thisUnit = this.getUnit(unitNumber);
         if (thisUnit != null) {
             units.addAll(getUnitParentsAndSelf(thisUnit));
-            //units.addAll(getAllSubUnits(unitNumber));
         }
         return units;
     }
 
     /**
      * This method returns a List of Units containing all the unit's parents up to the root unit, and includes the unit itself.
-     *
-     * @param unit
-     * @return
      */
     private List<Unit> getUnitParentsAndSelf(Unit unit) {
-        List<Unit> units = new ArrayList<Unit>();
+        List<Unit> units = new ArrayList<>();
         if (!StringUtils.isEmpty(unit.getParentUnitNumber())) {
             units.addAll(getUnitHierarchyForUnit(unit.getParentUnitNumber()));
         }
@@ -148,7 +144,6 @@ public class UnitServiceImpl implements UnitService {
     public String getSubUnitsForTreeView(String unitNumber) {
         // unitNumber will be like "<table width="600"><tr><td width="70%">BL-BL : BLOOMINGTON CAMPUS"
         String subUnits = null;
-        // Following index check maybe changed if refactor jsp page to align buttons.
         int startIdx = unitNumber.indexOf("px\">", unitNumber.indexOf("<tr>"));
         for (Unit unit : getSubUnits(unitNumber.substring(startIdx + 4, unitNumber.indexOf(COLUMN, startIdx) - 1))) {
             if (StringUtils.isNotBlank(subUnits)) {
@@ -179,9 +174,6 @@ public class UnitServiceImpl implements UnitService {
     }
 
     /**
-     * TODO : still WIP.  cleanup b4 move to prod
-     *
-     * @see org.kuali.coeus.common.framework.unit.UnitService#getInitialUnitsForUnitHierarchy()
      * Basic data structure : Get the Top node to display.
      * The node data is like following : 'parentidx-unitNumber : unitName' and separated by ';1;'
      */
@@ -246,9 +238,8 @@ public class UnitServiceImpl implements UnitService {
         return 0;
     }
 
-    @SuppressWarnings("unchecked")
     public List<UnitAdministrator> retrieveUnitAdministratorsByUnitNumber(String unitNumber) {
-        Map<String, String> queryMap = new HashMap<String, String>();
+        Map<String, String> queryMap = new HashMap<>();
         queryMap.put(UNIT_NUMBER, unitNumber);
         List<UnitAdministrator> unitAdministrators =
                 (List<UnitAdministrator>) getBusinessObjectService().findMatching(UnitAdministrator.class, queryMap);
@@ -262,15 +253,14 @@ public class UnitServiceImpl implements UnitService {
          * A closer to accurate query would be:
          *      select count(distinct parent_unit_number) as counter from unit where PARENT_UNIT_NUMBER is not null
          * although this to will result in a higher number than the true depth.
-         * @TODO fix this as time allows. 
          */
+        //TODO fix crap
         return getBusinessObjectService().findAll(Unit.class).size();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<UnitCorrespondent> retrieveUnitCorrespondentsByUnitNumber(String unitNumber) {
-        Map<String, String> queryMap = new HashMap<String, String>();
+        Map<String, String> queryMap = new HashMap<>();
         queryMap.put(UNIT_NUMBER, unitNumber);
         List<UnitCorrespondent> unitCorrespondents =
                 (List<UnitCorrespondent>) getBusinessObjectService().findMatching(UnitCorrespondent.class, queryMap);
@@ -278,9 +268,8 @@ public class UnitServiceImpl implements UnitService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<IacucUnitCorrespondent> retrieveIacucUnitCorrespondentsByUnitNumber(String unitNumber) {
-        Map<String, String> queryMap = new HashMap<String, String>();
+        Map<String, String> queryMap = new HashMap<>();
         queryMap.put(UNIT_NUMBER, unitNumber);
         List<IacucUnitCorrespondent> unitCorrespondents =
                 (List<IacucUnitCorrespondent>) getBusinessObjectService().findMatching(IacucUnitCorrespondent.class, queryMap);
@@ -295,20 +284,10 @@ public class UnitServiceImpl implements UnitService {
         this.unitLookupDao = unitLookupDao;
     }
 
-    /**
-     * Sets the businessObjectService attribute value. Injected by Spring.
-     *
-     * @param businessObjectService The businessObjectService to set.
-     */
     public void setBusinessObjectService(BusinessObjectService businessObjectService) {
         this.businessObjectService = businessObjectService;
     }
 
-    /**
-     * Accessor for <code>{@link BusinessObjectService}</code>
-     *
-     * @return BusinessObjectService
-     */
     public BusinessObjectService getBusinessObjectService() {
         return this.businessObjectService;
     }
