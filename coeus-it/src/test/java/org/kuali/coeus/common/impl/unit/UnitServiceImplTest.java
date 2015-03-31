@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.kuali.kra.service.impl;
+package org.kuali.coeus.common.impl.unit;
 
 import org.junit.After;
 import org.junit.Before;

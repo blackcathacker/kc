@@ -1,6 +1,25 @@
+/*
+ * Kuali Coeus, a comprehensive research administration system for higher education.
+ *
+ * Copyright 2005-2015 Kuali, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.kuali.coeus.common.impl.unit;
 
-import junit.framework.Assert;
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.kuali.coeus.common.framework.unit.Unit;
@@ -81,4 +100,39 @@ public class UnitServiceImplTest {
 
         Assert.assertEquals(expects, unitService.findUnitsWithDirectParent(allUnits, "TWO"));
     }
+
+    @Test()
+    public void test_getParentUnitsInclusiveBottom() {
+        final List<Unit> expects = new ArrayList<Unit>() {{
+            add(one);
+            add(two);
+            add(three);
+        }};
+
+        List<Unit> returned = unitService.getParentUnitsInclusive(allUnits, "THREE");
+        Assert.assertTrue("Parent unit list " + returned + " did not match expected " + expects,CollectionUtils.subtract(expects, returned).isEmpty());
+    }
+
+    @Test()
+    public void test_getParentUnitsInclusiveMiddle() {
+        final List<Unit> expects = new ArrayList<Unit>() {{
+            add(one);
+            add(two);
+        }};
+
+        List<Unit> returned = unitService.getParentUnitsInclusive(allUnits, "TWO");
+        Assert.assertTrue("Parent unit list " + returned + " did not match expected " + expects, CollectionUtils.subtract(expects, returned).isEmpty());
+    }
+
+    @Test
+    public void test_getParentUnitsInclusiveOrphanChild() {
+        final List<Unit> expects = new ArrayList<Unit>() {{
+            add(three);
+        }};
+
+        allUnits.remove(two);
+        List<Unit> returned = unitService.getParentUnitsInclusive(allUnits, "THREE");
+        Assert.assertTrue("Parent unit list " + returned + " did not match expected " + expects, CollectionUtils.subtract(expects, returned).isEmpty());
+    }
+
 }

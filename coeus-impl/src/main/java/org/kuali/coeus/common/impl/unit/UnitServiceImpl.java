@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.kuali.coeus.common.framework.unit.Unit;
 import org.kuali.coeus.common.framework.unit.UnitService;
 import org.kuali.coeus.common.framework.unit.admin.UnitAdministrator;
@@ -43,6 +44,7 @@ import java.util.*;
 @Component("unitService")
 public class UnitServiceImpl implements UnitService {
 
+    private static final Logger LOGGER = Logger.getLogger(UnitServiceImpl.class);
     private static final String COLUMN = ":";
     private static final String SEPARATOR = ";1;";
     private static final String DASH = "-";
@@ -73,8 +75,8 @@ public class UnitServiceImpl implements UnitService {
     }
 
     @Override
-    public Collection<Unit> getUnits() {
-        return getBusinessObjectService().findAll(Unit.class);
+    public List<Unit> getUnits() {
+        return new ArrayList<>(getBusinessObjectService().findAll(Unit.class));
     }
 
     @Override
@@ -98,12 +100,7 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<Unit> getAllSubUnits(final String unitNumber) {
-        final List<Unit> units = (List<Unit>) businessObjectService.findAll(Unit.class);
-        if (CollectionUtils.isNotEmpty(units)) {
-            return findUnitsWithDirectParent(units, unitNumber);
-        }
-
-        return units;
+        return findUnitsWithDirectParent(getUnits(), unitNumber);
     }
 
     protected List<Unit> findUnitsWithDirectParent(List<Unit> units, final String directParent) {
@@ -126,26 +123,29 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public List<Unit> getUnitHierarchyForUnit(String unitNumber) {
-        List<Unit> units = new ArrayList<>();
-        Unit thisUnit = this.getUnit(unitNumber);
-        if (thisUnit != null) {
-            units.addAll(getUnitParentsAndSelf(thisUnit));
-        }
-        return units;
+        return getParentUnitsInclusive(getUnits(),unitNumber);
     }
 
-    /**
-     * This method returns a List of Units containing all the unit's parents up to the root unit, and includes the unit itself.
-     */
-    private List<Unit> getUnitParentsAndSelf(Unit unit) {
-        List<Unit> units = new ArrayList<>();
-        if (!StringUtils.isEmpty(unit.getParentUnitNumber())) {
-            units.addAll(getUnitHierarchyForUnit(unit.getParentUnitNumber()));
-        }
-        units.add(unit);
-        return units;
-    }
+    protected List<Unit> getParentUnitsInclusive(List<Unit> units, final String unit) {
+        if (CollectionUtils.isNotEmpty(units)) {
+            final Unit matched = CollectionUtils.find(units, new Predicate<Unit>() {
+                @Override
+                public boolean evaluate(Unit input) {
+                    return input.getUnitNumber() != null && input.getUnitNumber().equals(unit);
+                }
+            });
 
+            if (matched != null) {
+                final List<Unit> totalMatched = new ArrayList<>();
+                totalMatched.add(matched);
+                totalMatched.addAll(getParentUnitsInclusive(units, matched.getParentUnitNumber()));
+                return totalMatched;
+            } else if (unit != null) {
+                LOGGER.error("Invalid parent found " + unit);
+            }
+        }
+        return Collections.emptyList();
+    }
 
     @Override
     public String getSubUnitsForTreeView(String unitNumber) {
@@ -191,7 +191,6 @@ public class UnitServiceImpl implements UnitService {
         for (Unit unit : getSubUnits(instituteUnit.getUnitNumber())) {
             String subUnit = parentIdx + DASH + unit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit.getUnitName();
             subUnits = subUnits + subUnit + SEPARATOR;
-            ;
             for (Unit unit1 : getSubUnits(unit.getUnitNumber())) {
                 subUnits = subUnits + getParentIndex(subUnits, subUnit) + DASH + unit1.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit1.getUnitName() + SEPARATOR;
             }
