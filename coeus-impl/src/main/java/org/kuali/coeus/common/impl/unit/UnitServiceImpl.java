@@ -45,24 +45,24 @@ public class UnitServiceImpl implements UnitService {
     private static final String SEPARATOR = ";1;";
     private static final String DASH = "-";
     private static final String UNIT_NUMBER = "unitNumber";
-    
+
     @Autowired
     @Qualifier("unitLookupDao")
     private UnitLookupDao unitLookupDao;
-	
+
     @Autowired
     @Qualifier("businessObjectService")
-    private BusinessObjectService businessObjectService;   
-    
+    private BusinessObjectService businessObjectService;
+
     @Override
-    public Unit getUnitCaseInsensitive(String unitNumber){
+    public Unit getUnitCaseInsensitive(String unitNumber) {
         Unit unit = null;
         if (StringUtils.isNotEmpty(unitNumber)) {
             unit = getUnitLookupDao().findUnitbyNumberCaseInsensitive(unitNumber);
         }
         return unit;
     }
-    
+
     @Override
     public String getUnitName(String unitNumber) {
         String unitName = null;
@@ -95,7 +95,7 @@ public class UnitServiceImpl implements UnitService {
 
         return unit;
     }
-    
+
     @Override
     public List<Unit> getSubUnits(String unitNumber) {
         List<Unit> units = new ArrayList<Unit>();
@@ -104,7 +104,7 @@ public class UnitServiceImpl implements UnitService {
         units.addAll(getBusinessObjectService().findMatching(Unit.class, fieldValues));
         return units;
     }
-    
+
     @Override
     public List<Unit> getAllSubUnits(String unitNumber) {
         List<Unit> units = new ArrayList<Unit>();
@@ -113,10 +113,10 @@ public class UnitServiceImpl implements UnitService {
         for (Unit subUnit : subUnits) {
             units.addAll(getAllSubUnits(subUnit.getUnitNumber()));
         }
-        
+
         return units;
     }
-    
+
     @Override
     public List<Unit> getUnitHierarchyForUnit(String unitNumber) {
         List<Unit> units = new ArrayList<Unit>();
@@ -127,10 +127,10 @@ public class UnitServiceImpl implements UnitService {
         }
         return units;
     }
-    
+
     /**
-     * 
      * This method returns a List of Units containing all the unit's parents up to the root unit, and includes the unit itself.
+     *
      * @param unit
      * @return
      */
@@ -143,32 +143,32 @@ public class UnitServiceImpl implements UnitService {
         return units;
     }
 
-    
+
     @Override
     public String getSubUnitsForTreeView(String unitNumber) {
         // unitNumber will be like "<table width="600"><tr><td width="70%">BL-BL : BLOOMINGTON CAMPUS"
         String subUnits = null;
         // Following index check maybe changed if refactor jsp page to align buttons.
         int startIdx = unitNumber.indexOf("px\">", unitNumber.indexOf("<tr>"));
-        for (Unit unit : getSubUnits(unitNumber.substring(startIdx+4, unitNumber.indexOf(COLUMN, startIdx) - 1))) {
+        for (Unit unit : getSubUnits(unitNumber.substring(startIdx + 4, unitNumber.indexOf(COLUMN, startIdx) - 1))) {
             if (StringUtils.isNotBlank(subUnits)) {
-                subUnits = subUnits +"#SEPARATOR#" +unit.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit.getUnitName();
+                subUnits = subUnits + "#SEPARATOR#" + unit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit.getUnitName();
             } else {
-                subUnits = unit.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit.getUnitName();                
+                subUnits = unit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit.getUnitName();
             }
         }
         return subUnits;
-        
+
     }
-    
+
     @Override
     public Unit getTopUnit() {
         Unit topUnit = null;
 
         List<Unit> allUnits = (List<Unit>) getUnits();
         if (CollectionUtils.isNotEmpty(allUnits)) {
-            for(Unit unit: allUnits) {
-                if(StringUtils.isEmpty(unit.getParentUnitNumber())) {
+            for (Unit unit : allUnits) {
+                if (StringUtils.isEmpty(unit.getParentUnitNumber())) {
                     topUnit = unit;
                     break;
                 }
@@ -177,9 +177,10 @@ public class UnitServiceImpl implements UnitService {
 
         return topUnit;
     }
-    
+
     /**
      * TODO : still WIP.  cleanup b4 move to prod
+     *
      * @see org.kuali.coeus.common.framework.unit.UnitService#getInitialUnitsForUnitHierarchy()
      * Basic data structure : Get the Top node to display.
      * The node data is like following : 'parentidx-unitNumber : unitName' and separated by ';1;'
@@ -187,71 +188,73 @@ public class UnitServiceImpl implements UnitService {
     public String getInitialUnitsForUnitHierarchy() {
         Unit instituteUnit = getTopUnit();
         int parentIdx = 0;
-        String subUnits = instituteUnit.getUnitNumber() +KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+instituteUnit.getUnitName()+SEPARATOR;
+        String subUnits = instituteUnit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + instituteUnit.getUnitName() + SEPARATOR;
         for (Unit unit : getSubUnits(instituteUnit.getUnitNumber())) {
-            String subUnit = parentIdx + DASH + unit.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit.getUnitName();
-            subUnits = subUnits + subUnit + SEPARATOR;;
+            String subUnit = parentIdx + DASH + unit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit.getUnitName();
+            subUnits = subUnits + subUnit + SEPARATOR;
+            ;
             for (Unit unit1 : getSubUnits(unit.getUnitNumber())) {
-                subUnits = subUnits + getParentIndex(subUnits,subUnit) + DASH + unit1.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit1.getUnitName()+SEPARATOR;
+                subUnits = subUnits + getParentIndex(subUnits, subUnit) + DASH + unit1.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit1.getUnitName() + SEPARATOR;
             }
         }
         subUnits = subUnits.substring(0, subUnits.length() - 3);
 
         return subUnits;
-        
+
     }
-    
+
     public String getInitialUnitsForUnitHierarchy(int depth) {
         Unit instituteUnit = getTopUnit();
         int parentIdx = 0;
-        String subUnits = instituteUnit.getUnitNumber() +KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+instituteUnit.getUnitName()+SEPARATOR;
+        String subUnits = instituteUnit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + instituteUnit.getUnitName() + SEPARATOR;
         for (Unit unit : getSubUnits(instituteUnit.getUnitNumber())) {
-            String subUnit = parentIdx + DASH + unit.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit.getUnitName();
-            subUnits = subUnits + subUnit+SEPARATOR;
+            String subUnit = parentIdx + DASH + unit.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit.getUnitName();
+            subUnits = subUnits + subUnit + SEPARATOR;
             if (depth - 2 > 0) {
-                subUnits = subUnits +  getSubUnits(getParentIndex(subUnits,subUnit), unit, depth - 2);
+                subUnits = subUnits + getSubUnits(getParentIndex(subUnits, subUnit), unit, depth - 2);
             }
         }
         subUnits = subUnits.substring(0, subUnits.length() - 3);
 
         return subUnits;
-        
+
     }
 
-    protected String getSubUnits (int parentIdx, Unit unit, int level) {
-        String subUnits="";
+    protected String getSubUnits(int parentIdx, Unit unit, int level) {
+        String subUnits = "";
         level--;
         for (Unit unit1 : getSubUnits(unit.getUnitNumber())) {
-            String subUnit = parentIdx + DASH + unit1.getUnitNumber()+KRADConstants.BLANK_SPACE+COLUMN+KRADConstants.BLANK_SPACE+unit1.getUnitName();
-            subUnits = subUnits + subUnit + SEPARATOR;;
+            String subUnit = parentIdx + DASH + unit1.getUnitNumber() + KRADConstants.BLANK_SPACE + COLUMN + KRADConstants.BLANK_SPACE + unit1.getUnitName();
+            subUnits = subUnits + subUnit + SEPARATOR;
+            ;
             if (level > 0) {
-                subUnits = subUnits +  getSubUnits(getParentIndex(subUnits,subUnit), unit1, level);
+                subUnits = subUnits + getSubUnits(getParentIndex(subUnits, subUnit), unit1, level);
             }
         }
-        return subUnits;        
+        return subUnits;
     }
 
     protected int getParentIndex(String subUnits, String subUnit) {
         String[] units = subUnits.split(SEPARATOR);
         int i = 0;
-        for (String unit: units) {
-            if (StringUtils.equals(unit,subUnit)) {
+        for (String unit : units) {
+            if (StringUtils.equals(unit, subUnit)) {
                 return i;
             }
             i++;
         }
         return 0;
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<UnitAdministrator> retrieveUnitAdministratorsByUnitNumber(String unitNumber) {
         Map<String, String> queryMap = new HashMap<String, String>();
         queryMap.put(UNIT_NUMBER, unitNumber);
-        List<UnitAdministrator> unitAdministrators = 
-            (List<UnitAdministrator>) getBusinessObjectService().findMatching(UnitAdministrator.class, queryMap);
+        List<UnitAdministrator> unitAdministrators =
+                (List<UnitAdministrator>) getBusinessObjectService().findMatching(UnitAdministrator.class, queryMap);
         return unitAdministrators;
     }
-    
+
     @Override
     public int getMaxUnitTreeDepth() {
         /**
@@ -269,21 +272,21 @@ public class UnitServiceImpl implements UnitService {
     public List<UnitCorrespondent> retrieveUnitCorrespondentsByUnitNumber(String unitNumber) {
         Map<String, String> queryMap = new HashMap<String, String>();
         queryMap.put(UNIT_NUMBER, unitNumber);
-        List<UnitCorrespondent> unitCorrespondents = 
-            (List<UnitCorrespondent>) getBusinessObjectService().findMatching(UnitCorrespondent.class, queryMap);
+        List<UnitCorrespondent> unitCorrespondents =
+                (List<UnitCorrespondent>) getBusinessObjectService().findMatching(UnitCorrespondent.class, queryMap);
         return unitCorrespondents;
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public List<IacucUnitCorrespondent> retrieveIacucUnitCorrespondentsByUnitNumber(String unitNumber) {
         Map<String, String> queryMap = new HashMap<String, String>();
         queryMap.put(UNIT_NUMBER, unitNumber);
-        List<IacucUnitCorrespondent> unitCorrespondents = 
-            (List<IacucUnitCorrespondent>) getBusinessObjectService().findMatching(IacucUnitCorrespondent.class, queryMap);
+        List<IacucUnitCorrespondent> unitCorrespondents =
+                (List<IacucUnitCorrespondent>) getBusinessObjectService().findMatching(IacucUnitCorrespondent.class, queryMap);
         return unitCorrespondents;
     }
-    
+
     public UnitLookupDao getUnitLookupDao() {
         return unitLookupDao;
     }
@@ -294,13 +297,13 @@ public class UnitServiceImpl implements UnitService {
 
     /**
      * Sets the businessObjectService attribute value. Injected by Spring.
-     * 
+     *
      * @param businessObjectService The businessObjectService to set.
      */
     public void setBusinessObjectService(BusinessObjectService businessObjectService) {
         this.businessObjectService = businessObjectService;
     }
-    
+
     /**
      * Accessor for <code>{@link BusinessObjectService}</code>
      *
@@ -309,5 +312,5 @@ public class UnitServiceImpl implements UnitService {
     public BusinessObjectService getBusinessObjectService() {
         return this.businessObjectService;
     }
-    
+
 }
