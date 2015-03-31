@@ -84,9 +84,15 @@ public class UnitServiceImplTest extends KcIntegrationTestBase {
     }
 
     @Test
-    public void testGetAllSubUnits() {
+    public void testGetAllSubUnitsCardiology() {
         List<Unit> units = unitService.getAllSubUnits(CARDIOLOGY_UNIT_NUMBER);
         assertEquals(1, units.size());
+    }
+
+    @Test
+    public void testGetAllSubUnitsTop() {
+        List<Unit> units = unitService.getAllSubUnits("000001");
+        assertEquals(12, units.size());
     }
 
     @Test

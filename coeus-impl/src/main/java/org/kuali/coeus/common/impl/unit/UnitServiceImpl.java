@@ -19,6 +19,8 @@
 package org.kuali.coeus.common.impl.unit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.kuali.coeus.common.framework.unit.Unit;
 import org.kuali.coeus.common.framework.unit.UnitService;
@@ -45,6 +47,7 @@ public class UnitServiceImpl implements UnitService {
     private static final String SEPARATOR = ";1;";
     private static final String DASH = "-";
     private static final String UNIT_NUMBER = "unitNumber";
+    private static final String PARENT_UNIT_NUMBER = "parentUnitNumber";
 
     @Autowired
     @Qualifier("unitLookupDao")
@@ -65,17 +68,8 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public String getUnitName(String unitNumber) {
-        String unitName = null;
-        Map<String, String> primaryKeys = new HashMap<>();
-        if (StringUtils.isNotEmpty(unitNumber)) {
-            primaryKeys.put("unitNumber", unitNumber);
-            Unit unit = getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
-            if (unit != null) {
-                unitName = unit.getUnitName();
-            }
-        }
-
-        return unitName;
+        final Unit unit = getUnit(unitNumber);
+        return unit != null ? unit.getUnitName() : null;
     }
 
     @Override
@@ -85,36 +79,49 @@ public class UnitServiceImpl implements UnitService {
 
     @Override
     public Unit getUnit(String unitNumber) {
-        Unit unit = null;
 
-        Map<String, String> primaryKeys = new HashMap<>();
         if (StringUtils.isNotEmpty(unitNumber)) {
-            primaryKeys.put("unitNumber", unitNumber);
-            unit = getBusinessObjectService().findByPrimaryKey(Unit.class, primaryKeys);
+            return getBusinessObjectService().findBySinglePrimaryKey(Unit.class, unitNumber);
         }
 
-        return unit;
+        return null;
     }
 
     @Override
     public List<Unit> getSubUnits(String unitNumber) {
         List<Unit> units = new ArrayList<>();
         Map<String, Object> fieldValues = new HashMap<>();
-        fieldValues.put("parentUnitNumber", unitNumber);
+        fieldValues.put(PARENT_UNIT_NUMBER, unitNumber);
         units.addAll(getBusinessObjectService().findMatching(Unit.class, fieldValues));
         return units;
     }
 
     @Override
-    public List<Unit> getAllSubUnits(String unitNumber) {
-        List<Unit> units = new ArrayList<>();
-        List<Unit> subUnits = getSubUnits(unitNumber);
-        units.addAll(subUnits);
-        for (Unit subUnit : subUnits) {
-            units.addAll(getAllSubUnits(subUnit.getUnitNumber()));
+    public List<Unit> getAllSubUnits(final String unitNumber) {
+        final List<Unit> units = (List<Unit>) businessObjectService.findAll(Unit.class);
+        if (CollectionUtils.isNotEmpty(units)) {
+            return findUnitsWithDirectParent(units, unitNumber);
         }
 
         return units;
+    }
+
+    protected List<Unit> findUnitsWithDirectParent(List<Unit> units, final String directParent) {
+        if (CollectionUtils.isNotEmpty(units)) {
+            final List<Unit> matched = ListUtils.select(units, new Predicate<Unit>() {
+                @Override
+                public boolean evaluate(Unit input) {
+                    return input.getParentUnitNumber() != null && input.getParentUnitNumber().equals(directParent);
+                }
+            });
+
+            final List<Unit> totalMatched = new ArrayList<>(matched);
+            for (Unit child : matched) {
+                totalMatched.addAll(findUnitsWithDirectParent(units, child.getUnitNumber()));
+            }
+            return totalMatched;
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -254,7 +261,7 @@ public class UnitServiceImpl implements UnitService {
          *      select count(distinct parent_unit_number) as counter from unit where PARENT_UNIT_NUMBER is not null
          * although this to will result in a higher number than the true depth.
          */
-        //TODO fix crap
+        //FIXME fix crap
         return getBusinessObjectService().findAll(Unit.class).size();
     }
 
